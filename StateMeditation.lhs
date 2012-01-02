@@ -34,7 +34,7 @@ Monads, it is generally accepted, are burritos. The \li{State} monad is a burrit
 with an innovative new option:
 bake an ingredient of your choice into the tortilla...
 
-
+Ahem. That is, the \li{State} monad is parameterized. Your meaty filling might be wrapped in a \li{State Int} monad or a \li{State [Char]} monad. These are different monads. 
 
 \section{Basics}
 The type of any state monad involves two types, one for the state and one for the 
@@ -94,9 +94,9 @@ x'' = (put $ get + 1) >> (return get) --type error
 To ``get out,'' use \lstinline{execState} and \lstinline{evalState}.
 Both take a \lstinline{State s a} monad and an initial state \lstinline{s}. This is confusing
 because the documentation (and concept) refers to both the monad \lstinline{State s a} and
-the naked value \lstinline{s} as ``state.'' \lstinline{State s a} is something different!
+the naked value (type?) \lstinline{s} as ``state.'' \lstinline{State s a} is not a state, but a plan for using state to do a computation.
 
-\lstinline{execState} returns the final (non-monadic) state \lstinline{s}.
+\li{execState} and \li{evalState} use that plan. \lstinline{execState} returns the final (non-monadic) state \lstinline{s}.
 \lstinline{evalState} returns \lstinline{a}.
 
 \begin{code}
@@ -112,7 +112,7 @@ y' = execState z 1
 
 \lstinline{mapState} lets one apply a non-monadic function to a \lstinline{State s a}.
 
-What is the difference between (\lstinline{mapState f}) and (\lstinline{liftM f})??
+What is the difference between (\lstinline{mapState f}) and (\lstinline{liftM f})? Not much sometimes. See ``Nitpicking'' below.
 
 This begins with a dinky little function. It takes a pair of values,
 one being the value (\lstinline{evalState}) and one being the state (\lstinline{execState}).
@@ -179,7 +179,7 @@ chainingExampleTwoA :: ([Int], String)
 chainingExampleTwoA = runState (sequence [aOne, aOne, aTwo]) "TWO-A"
    -- ([5,21,38],"TWO-A has been merped has been merped has been merped --> x was 37")
 \end{code}
-\lstinline{sequence} produces a new monad around an array. 
+\lstinline{sequence} produces a new monad parameterized by an array. 
 Not so when ``chaining by hand.''
 
 \lstinline{withState} is the counterpart of \lstinline{mapState} 
@@ -194,8 +194,6 @@ merp2 str = str ++ " and an ice cream cone"
 w :: State String Int
 w = withState merp2 aOne
 \end{code}
-
-\section{Recursion and State}
 
 \section{Nitpicking}
 This example, from the \lstinline{Control.Monad.State} documentation, felt contrived when I first met it. 
@@ -219,51 +217,6 @@ swapState = mapState (\ (t, tab) -> (tab, t))
 \end{code}
 
 
-
-\begin{code}
-type Line = String
-data IndentedLine = IndentedLine Int Line
-   deriving (Show)
-data IndentationLevel = IndentationLevel {spaces :: Int,
-                                          level  :: Int}
-   deriving (Show)
-
-type IndentationHistory = [IndentationLevel]
-
-instance Show (State IndentationHistory [IndentedLine]) where
-   show indentation  = "x = State IndentationHistory [IndentedLine], where for example\n\trunState x 0 ->\n\t" ++ (show $ runState indentation [IndentationLevel 0 0]) 
-
-indentToLevels :: [Line] -> State IndentationHistory [IndentedLine]
-indentToLevels [] = do 
-   return []
-indentToLevels (line:lines) = do
-   oldHistory <- get
-   let currentSpaces = spaces currentS
-   let currentLevel = level currentS
-   let newLevel = case (compare currentSpaces (leadingSpaces line)) of
-                     LT -> currentLevel + 1
-                     EQ -> currentLevel 
-                     GT -> currentLevel - 1
-   put $ oldHistory ++ [IndentationLevel {spaces = (leadingSpaces line), level = newLevel}]
-   theRest <- indentToLevels lines
-   return $ (IndentedLine newLevel line) : theRest
-       
-leadingSpaces line = length $ takeWhile (==' ') line
-
-matchHistory indentationHistory indentation = case matchingHistory of
-   where matchingHistory = dropWhile (not . indentEquals indentation) indentationHistory
-
-testStrings = ["Derp de herp",
-   "herp",
-   " pony",
-   "   twilight sparkle",
-   "   rarity",
-   "  fluttershy",
-   " dragon",
-   "concluded"]
-
-
-\end{code}
 
 
 Helper code reproduced from the tutorial.
