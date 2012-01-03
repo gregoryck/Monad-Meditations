@@ -6,6 +6,7 @@
       \csname lst@SetFirstLabel\endcsname}
     {\csname lst@SaveFirstLabel\endcsname}
     \lstset{
+    showstringspaces=false,
     frame=single,
     language=Haskell,
       basicstyle=\small\ttfamily,
