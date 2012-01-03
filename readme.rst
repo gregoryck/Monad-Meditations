@@ -11,11 +11,12 @@ ListMeditation.hs
 StateMeditation.lhs
    Literate Haskell. An exploration of the State monad, considerably more involved. Walks through the do notation and >>= notation to describe a State monad,
    then surveys the many, many functions to work with one afterward.
+StateParser.lhs
+   Not sure if I'd call this a parser. But it will be an application of the State monad.
 
 
 TODO
 ----
-- A more practical application of the State monad.
 - Monad transformers.
 
 
