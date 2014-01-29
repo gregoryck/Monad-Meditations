@@ -24,3 +24,10 @@ states = map accumLetters' xs
 ys' = reverse $ snd $ execState (sequence states) (capitalLetters, [])
 
 main = print ys'
+
+
+
+accumLetters'' (n, thisLetter) ys =
+    (take n $ repeat $ thisLetter):ys
+
+ys'' = foldr accumLetters'' [] $ zip xs capitalLetters
